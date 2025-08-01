@@ -6,45 +6,48 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/02 13:21:53 by fpetit            #+#    #+#             */
-/*   Updated: 2025/07/29 17:37:54 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/01 15:09:47 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ScalarConverter.hpp"#
+#include "ScalarConverter.hpp"
 #include "util.hpp"
+
+static void	doTests(std::string testCategory, std::string literals[], std::string names[], int size)
+{
+	printcol(PURPLEBACK, testCategory);
+	for (int i = 0; i < size; i++)
+	{
+		printcol(YELLOWBACK, names[i]);
+		ScalarConverter::convert(literals[i]);
+	}
+}
 
 int	main(void)
 {
-	printcol(YELLOWBACK, "empty");
-	ScalarConverter::convert("");
-
-	printcol(YELLOWBACK, "char literal");
-	ScalarConverter::convert("c");
-
-	printcol(YELLOWBACK, "int literal");
-	ScalarConverter::convert("42");
-	printcol(YELLOWBACK, "int literal negative");
-	ScalarConverter::convert("-42");
-	printcol(YELLOWBACK, "int literal 0");
-	ScalarConverter::convert("42");
-	
-	printcol(PURPLEBACK, "FLOAT");
-	printcol(YELLOWBACK, "nanf");
-	ScalarConverter::convert("nan");
-	printcol(YELLOWBACK, "+inff");
-	ScalarConverter::convert("+inff");
-	printcol(YELLOWBACK, "-inff");
-	ScalarConverter::convert("-inff");
-	printcol(YELLOWBACK, "float literal");
-	ScalarConverter::convert("42f");
-	
-	printcol(PURPLEBACK, "DOUBLE");
-	printcol(YELLOWBACK, "double literal");
-	ScalarConverter::convert("42.0");
-	printcol(YELLOWBACK, "nan");
-	ScalarConverter::convert("nan");
-	printcol(YELLOWBACK, "-inf");
-	ScalarConverter::convert("-inf");
-	printcol(YELLOWBACK, "+inf");
-	ScalarConverter::convert("+inf");
+	{
+		std::string literals[] = {"a"};
+		std::string	briefs[] = {"standard"};
+		doTests("FROM CHAR", literals, briefs, 1);
+	}
+	{
+		std::string literals[] = {"42", "-42", "0"};
+		std::string	briefs[] = {"standard", "negative", "zero"};
+		doTests("FROM INTEGER", literals, briefs, 3);
+	}
+	{
+		std::string literals[] = {"42f", "-42.01f", "nanf", "-inff", "+inff"};
+		std::string	briefs[] = {"standard", "negative with decimal", "nanf", "-inff", "+inff"};
+		doTests("FROM FLOAT", literals, briefs, 5);
+	}
+	{
+		std::string literals[] = {"42.", "-42.01", "nan", "-inf", "+inf"};
+		std::string	briefs[] = {"standard", "negative with decimal", "nan", "-inf", "+inf"};
+		doTests("FROM DOUBLE", literals, briefs, 5);
+	}
+	{
+		std::string literals[] = {""};
+		std::string	briefs[] = {"empty"};
+		doTests("SPECIAL CASES", literals, briefs, 1);
+	}
 }
