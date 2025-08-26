@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/02 13:21:53 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/02 20:05:33 by fpetit           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <cstdlib>
 #include <ctime>
 #include <typeinfo>
@@ -19,40 +7,34 @@
 #include "B.hpp"
 #include "C.hpp"
 
-int	getRandom(void)
+int	getRandom()
 {
 	int n = rand() % 3;
 	return (n);
 }
 
-Base * generate(void)
+Base * generate()
 {
 	int n = getRandom();
-	Base *sub = NULL;
 	switch (n)
 	{
-		case 0:
-			sub = new A();
-			break ;
-		case 1:
-			sub = new B();
-			break ;
-		default:
-			sub = new C();
+		case 0: return new A();
+		case 1: return new B();
+		default: return new C();
 	}
-	return sub;
+	return NULL;
 }
 
 void	identify(Base* p)
 {
-	if (A* a = dynamic_cast<A*>(p))
-	{
+	if (dynamic_cast<A*>(p))
 		std::cout << GREEN << "instance of class A " << NC << std::endl;
-	}
-	else if (B* b = dynamic_cast<B*>(p))
+	else if (dynamic_cast<B*>(p))
 		std::cout << GREEN << "instance of class B " << NC << std::endl;
-	else if (C* c = dynamic_cast<C*>(p))
+	else if (dynamic_cast<C*>(p))
 		std::cout << GREEN << "instance of class C " << NC << std::endl;
+	else
+		std::cout << "unknown" << std::endl;
 }
 
 void	identify(Base& p)
@@ -60,26 +42,20 @@ void	identify(Base& p)
 	try {
 		A& a = dynamic_cast<A&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &a << GREEN << " is instance of class A " << NC << std::endl;
-	} catch (std::bad_cast& e) {	
-		std::cout << e.what() << std::endl;
-	}
+	} catch (std::bad_cast& e) {}
 
 	try {
 		B& b = dynamic_cast<B&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &b << BLUE << " is instance of class B " << NC << std::endl; 
-	} catch (std::bad_cast& e) {
-		std::cout << e.what() << std::endl;
-	}
+	} catch (std::bad_cast& e) {}
 
 	try {
 		C& c = dynamic_cast<C&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &c << YELLOW << " is instance of class C " << NC << std::endl; 
-	} catch (std::bad_cast& e) {
-		std::cout << e.what() << std::endl;
-	}
+	} catch (std::bad_cast& e) {}
 }
 
-int	main(void)
+int	main()
 {
 	srand(time(NULL));
 

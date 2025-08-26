@@ -27,8 +27,10 @@ void	ScalarConverter::_toAll(T t, Type from)
 {
 	if ((from == FLOAT && ScalarConverter::_is_inff(t)) || (from == DOUBLE && ScalarConverter::_is_inf(t)))
 		std::cerr << RED << "char\t-> cant convert to char" << NC << std::endl;
-	else if ((from == FLOAT || from == DOUBLE || from == INT) && ((from == FLOAT && ScalarConverter::_is_nanf(t)) || (from == DOUBLE && ScalarConverter::_is_nand(t)) || !std::isprint(t)))
+	else if ((from == FLOAT && ScalarConverter::_is_nanf(t)) || (from == DOUBLE && ScalarConverter::_is_nand(t)))
 		std::cerr << RED << "char\t-> cant convert to char" << NC << std::endl;
+	else if ((from == FLOAT || from == DOUBLE || from == INT) && !std::isprint(t))
+		std::cerr << RED << "char\t-> value not in printable char range" << NC << std::endl;
 	else if (from == CHAR && !std::isprint(t))
 		std::cerr << RED << "char\t-> only printable characters should be passed as argument" << NC << std::endl;
 	else
