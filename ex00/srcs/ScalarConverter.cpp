@@ -6,7 +6,7 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/02 21:36:35 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/01 15:16:46 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/26 12:13:50 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,34 +53,22 @@ ScalarConverter& ScalarConverter::operator=(const ScalarConverter& inst)
 *		        🛠️ FUNCTIONS								*
 *************************************************************/
 
-static bool	_isPrintChar(std::string& s)
-{
-	return s.length() == 1 && std::isprint(s.c_str()[0]);
-}
-
-static double stoD(std::string& s)
-{
-	std::stringstream	ss;
-	double				d;
-
-	ss << s;
-	ss >> d;
-	return d;
-}
-
-static bool	_isInt(std::string& s)
+static bool	_isInt(std::string& s, int* i)
 {
 	std::string::iterator it = s.begin();
 
 	long	res = 0;
-	bool	isNeg = false;
+	int		negFactor = 1;
 
 	if (s == "0")
+	{
+		*i = 0;
 		return (true);
+	}
 	if (s[0] == '-' || s[0] == '+')
 	{
 		if (s[0] == '-')
-			isNeg = true;
+			negFactor = -1;
 		it++;
 	}
 	if (it == s.end())
@@ -96,175 +84,216 @@ static bool	_isInt(std::string& s)
 	}
 	if (res > INT_MAX || res < INT_MIN)
 		return (false);
+	*i = negFactor * res;
 	return (true);
 }
 
-static	bool	_isFloat(std::string& s)
+static	bool	_isFloat(std::string& s, float* f)
 {
 	std::string::iterator it = s.begin();
-	double d;
+	int	negFactor = 1;
 
-	if (s == "nanf" || s == "+inff" || s == "-inff" || s == "0f" || s == "0.f" || s == "0.0f")
+	if (s == "+inff")
+	{
+		*f = std::numeric_limits<float>::infinity();
+		return true;
+	}
+	else if (s == "-inff")
+	{
+		*f = -std::numeric_limits<float>::infinity();
+		return true;
+	}
+	else if (s == "nanf")
+	{
+		*f = std::numeric_limits<float>::quiet_NaN();
+		return true;
+	}
+	else if (s == "0f" || s == "0.f" || s == "0.0f")
+	{
+		*f = 0;
 		return (true);
+	}
 	if (s[0] == '-' || s[0] == '+')
+	{
+		if (s[0] == '-')
+			negFactor = -1;
 		it++;
+	}
 	if (it == s.end())
 		return (false);
+	if (*s.rbegin() != 'f')
+	{
+		return (false);
+	}
+	bool hasDecimal = false;
 	for (; it != s.end() - 1; it++)
 	{
-		if (!std::isdigit(*it) && *it != '.')
+		if (std::isdigit(*it))
+			continue;
+		else if (*it == '.' && !hasDecimal)
+			hasDecimal = true;
+		else
 			return (false);
 	}
-	if ((*s.end()) != 'f')
-		return (false);
-	d = stoD(s);
-	std::cout << "double value is"<< d << std::endl;
-	if (d < __FLT_MAX__ && d > __FLT_MIN__)
+
+	std::string sub(s.begin(), s.end() - 1);
+
+	char* endptr;
+
+	double d = std::strtod(sub.c_str(), &endptr);
+	if (errno == ERANGE || endptr == sub.c_str() || *endptr != '\0')
+		return false;
+	if (d > std::numeric_limits<float>::max() || d < -std::numeric_limits<float>::max())
+		return false;
+	// checking for underflow
+	if (d != 0.0 && d > -std::numeric_limits<float>::min() && d < std::numeric_limits<float>::min())
+	{
+		if (d > 0 && d < std::numeric_limits<float>::min())
+			return false;
+		if (d < 0 && d > -std::numeric_limits<float>::min())
+			return false;
+	}
+	*f = negFactor * static_cast<float>(d);
+	if (std::isinf(*f) && !std::isinf(d))
+		return false;
+	if (std::isnan(*f) && !std::isnan(d))
+		return false;
+	return (true);
+}
+
+static bool	_isDouble(std::string& s, double* d)
+{
+	std::string::iterator it = s.begin();
+	int	negFactor = 1;
+
+	if (s == "+inf")
+	{
+		*d = std::numeric_limits<double>::infinity();
+		return true;
+	}
+	else if (s == "-inf")
+	{
+		*d = - std::numeric_limits<double>::infinity();
+		return true;
+	}
+	else if (s == "nan")
+	{
+		*d = std::numeric_limits<double>::quiet_NaN();
+		return true;
+	}
+	if (s == "0.0" || s == "0.")
+	{
+		*d = 0;
 		return (true);
+	}
+	if (s[0] == '-' || s[0] == '+')
+	{
+		if (s[0] == '-')
+			negFactor = -1;
+		it++;
+	}
+	if (it == s.end())
+		return (false);
+
+	bool hasDecimal = false;
+	for (; it != s.end(); it++)
+	{
+		if (std::isdigit(*it))
+			continue;
+		else if (*it == '.' && !hasDecimal)
+			hasDecimal = true;
+		else
+			return (false);
+	}
+	double dou = std::strtod(s.c_str(), NULL);
+	if (dou != 0)
+	{
+		*d = negFactor * dou;
+		return (true);
+	}
 	return (false);
 }
 
-static bool	_isDouble(std::string& s)
-{
-	std::string::iterator it = s.begin();
-
-	if (s == "nan" || s == "+inf" || s == "-inf" || s == "0.0" || s == "0.")
-		return (true);
-	if (s[0] == '-' || s[0] == '+')
-		it++;
-	if (it == s.end())
-		return (false);
-	if (s.find('.', 0) == std::string::npos)
-		return (false);
-	for (; it != s.end(); it++)
-	{
-		if (!std::isdigit(*it) && *it != '.')
-			return (false);
-	}
-	return (true);
-}
-
-Type		ScalarConverter::_guessType(std::string& s)
+Type	_guessType(std::string& s, char* c, int* i, float* f, double* d)
 {
 	if (s == "")
 		return (EMPTY);
-
-	if (_isPrintChar(s))
-		return (CHAR);
-	else if (_isInt(s))
+	if (_isInt(s, i))
 		return (INT);
-	else if (_isFloat(s))
+	else if (_isFloat(s, f))
 		return (FLOAT);
-	else if (_isDouble(s))
+	else if (_isDouble(s, d))
 		return (DOUBLE);
+	else if (s.length() == 1)
+	{
+		*c = s.c_str()[0];
+		return (CHAR);
+	}
 	else
 		return (UNKNOWN);
-		
 }
 
-static char		_toChar(Type from, std::string& s)
-{
-	char c = s.c_str()[0];
-	if (c <= 31 || c > 127)
-	{
-		std::cerr << RED << "only printable characters should be passed" << NC << std::endl;
-		return c;
-	}
-	switch (from)
-	{
-		case CHAR:
-			return c;
-		case INT:
-			return c;
-		case FLOAT:
-			std::cerr << RED << "cant convert float -> char" << NC;
-			return '\0';
-		case DOUBLE:
-			std::cerr << RED << "cant convert double -> char" << NC;
-			return '\0';
-		default:
-			return c;
-	}
+bool ScalarConverter::_is_nanf(float f) {
+	return f != f;
 }
 
-static int		_toInt(Type from, std::string& s)
-{
-	switch (from)
-	{
-		case CHAR:
-			return static_cast<int>(s.c_str()[0]);
-			break ;
-		case INT:
-		case FLOAT:
-		case DOUBLE:
-			return static_cast<int>(stoD(s));
-			break ;
-		default:
-			return (-1);
-	}
+bool ScalarConverter::_is_nand(double d) {
+	return d != d;
 }
 
-static float	_toFloat(Type from, std::string& s)
+bool is_pos_inff(float f)
 {
-	switch (from)
-	{
-		case CHAR:
-			return static_cast<float>(s.c_str()[0]);
-			break ;
-		case INT:
-			return static_cast<float>(stoD(s));
-			break ;
-		case FLOAT:
-			return static_cast<float>(stoD(s));
-			break ;
-		case DOUBLE:
-			return static_cast<float>(stoD(s));
-			break ;
-		default:
-			return (-1);
-	}
+	return f == std::numeric_limits<float>::infinity();
 }
 
-static double	_toDouble(Type from, std::string& s)
+bool is_neg_inff(float f)
 {
-	switch (from)
-	{
-		case CHAR:
-			return static_cast<double>(s.c_str()[0]);
-			break ;
-		case INT:
-			return static_cast<double>(stoD(s));
-			break ;
-		case FLOAT:
-			return static_cast<double>(stoD(s));
-			break ;
-		case DOUBLE:
-			return static_cast<double>(stoD(s));
-			break ;
-		default:
-			return (-1);
-	}
-}
-static void	tryConvertToAll(Type from, std::string& s)
-{
-	if (from == CHAR || from == INT || from == FLOAT || from == DOUBLE)
-	{
-		std::cout << CCHAR << "CHAR\t" << _toChar(from, s) << NC << std::endl;
-		std::cout << CINT << "INT\t" << _toInt(from, s) << NC << std::endl;
-		std::cout << CFLOAT << "FLOAT\t" << _toFloat(from, s) << NC << std::endl;
-		std::cout << CDOUBLE << "DOUBLE\t" << _toDouble(from, s) << NC << std::endl;
-	}
-	else
-		std::cerr << "type could not be detected" << std::endl;
+	return f == -std::numeric_limits<float>::infinity();
 }
 
+bool is_pos_inf(double d)
+{
+	return d == std::numeric_limits<double>::infinity();
+}
+
+bool is_neg_inf(double d)
+{
+	return d == -std::numeric_limits<double>::infinity();
+}
+
+bool ScalarConverter::_is_inff(float f)
+{
+	return (is_neg_inf(f) || is_pos_inff(f));
+}
+bool ScalarConverter::_is_inf(double d)
+{
+	return (is_neg_inf(d) || is_pos_inf(d));
+}
 
 void	ScalarConverter::convert(std::string& s)
 {
-	Type t = ScalarConverter::_guessType(s);
-	tryConvertToAll(t, s);
-}
+	char	c;
+	int		i;
+	float	f;
+	double	d;
 
-/*************************************************************
-*		    👁️‍ GETTERS and SETTERS				 			*
-*************************************************************/
+	Type t = _guessType(s, &c, &i, &f, &d);
+	switch (t)
+	{
+		case CHAR:
+			_toAll(c, CHAR);
+			break ;
+		case INT:
+			_toAll(i, INT);
+			break ;
+		case FLOAT:
+			_toAll(f, FLOAT);
+			break ;
+		case DOUBLE:
+			_toAll(d, DOUBLE);
+			break ;
+		default:
+			std::cerr << "\ttype could not be detected" << std::endl;
+	}
+
+}

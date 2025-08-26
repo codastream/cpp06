@@ -6,7 +6,7 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 00:19:26 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/01 15:07:09 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/26 12:08:55 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,11 @@
 #include <cctype>
 #include <climits>
 #include <limits>
+#include <iomanip>
+#include <cstdlib>
+#include <cerrno>
+
+#include "util.hpp"
 
 enum Type {CHAR, INT, FLOAT, DOUBLE, EMPTY, UNKNOWN};
 class ScalarConverter {
@@ -32,11 +37,27 @@ class ScalarConverter {
 		ScalarConverter(const ScalarConverter& other);
 		ScalarConverter& operator=(const ScalarConverter& other);
 
-		static Type		_guessType(std::string& s);
-		static char		_toChar(Type from, std::string& s);
-		static int		_toInt(Type from, std::string& s);
-		static float	_toFloat(Type from, std::string& s);
-		static double	_toDouble(Type fro, std::string& s);
+		static bool _is_nanf(float f);
+		static bool _is_nand(double d);
+		static bool _is_inff(float f);
+		static bool _is_inf(double d);
+
+		template <typename T>
+		static double _toDouble(T t);
+
+		template <typename T>
+		static float _toFloat(T t);
+
+		template <typename T>
+		static int _toInt(T t);
+
+		template <typename T>
+		static char _toChar(T t);
+
+		template <typename T>
+		static void	_toAll(T t, Type from);
 };
+
+#include "ScalarConverter.tpp"
 
 #endif
