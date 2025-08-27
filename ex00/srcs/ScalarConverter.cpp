@@ -6,7 +6,7 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/02 21:36:35 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/26 12:13:50 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/27 14:55:22 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,18 +140,18 @@ static	bool	_isFloat(std::string& s, float* f)
 
 	char* endptr;
 
+	errno = 0;
 	double d = std::strtod(sub.c_str(), &endptr);
 	if (errno == ERANGE || endptr == sub.c_str() || *endptr != '\0')
 		return false;
 	if (d > std::numeric_limits<float>::max() || d < -std::numeric_limits<float>::max())
 		return false;
 	// checking for underflow
-	if (d != 0.0 && d > -std::numeric_limits<float>::min() && d < std::numeric_limits<float>::min())
+
+
+	if (d != 0.0 && std::abs(d) < std::numeric_limits<float>::min() )
 	{
-		if (d > 0 && d < std::numeric_limits<float>::min())
-			return false;
-		if (d < 0 && d > -std::numeric_limits<float>::min())
-			return false;
+		return false;
 	}
 	*f = negFactor * static_cast<float>(d);
 	if (std::isinf(*f) && !std::isinf(d))

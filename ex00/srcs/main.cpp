@@ -6,7 +6,7 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/02 13:21:53 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/26 10:37:39 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/27 13:26:45 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static void	doTests(std::string testCategory, std::string literals[], std::strin
 	}
 }
 
-int	main(void)
+void readyTests()
 {
 	{
 		std::string literals[] = {"a"};
@@ -50,4 +50,14 @@ int	main(void)
 		std::string	briefs[] = {"empty"};
 		doTests("SPECIAL CASES", literals, briefs, 1);
 	}
+}
+
+int	main(int ac, char **av)
+{
+	if (ac == 2)
+	{
+		std::string arg = av[1];
+		ScalarConverter::convert(arg);
+	}
+	(void) readyTests;
 }

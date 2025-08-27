@@ -6,7 +6,7 @@
 /*   By: fpetit <fpetit@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 00:19:26 by fpetit            #+#    #+#             */
-/*   Updated: 2025/08/26 12:08:55 by fpetit           ###   ########.fr       */
+/*   Updated: 2025/08/27 14:37:25 by fpetit           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,9 @@ class ScalarConverter {
 
 		template <typename T>
 		static void	_toAll(T t, Type from);
+
+		template <typename T>
+		static bool _isPrint(T t);
 };
 
 #include "ScalarConverter.tpp"
