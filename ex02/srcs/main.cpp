@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <ctime>
-#include <typeinfo>
 #include "utils.hpp"
 #include "Base.hpp"
 #include "A.hpp"
@@ -42,17 +41,17 @@ void	identify(Base& p)
 	try {
 		A& a = dynamic_cast<A&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &a << GREEN << " is instance of class A " << NC << std::endl;
-	} catch (std::bad_cast& e) {}
+	} catch (std::exception& e) {}
 
 	try {
 		B& b = dynamic_cast<B&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &b << BLUE << " is instance of class B " << NC << std::endl; 
-	} catch (std::bad_cast& e) {}
+	} catch (std::exception& e) {}
 
 	try {
 		C& c = dynamic_cast<C&>(p);
 		std::cout << "inst casted from " << &p << " @ " << &c << YELLOW << " is instance of class C " << NC << std::endl; 
-	} catch (std::bad_cast& e) {}
+	} catch (std::exception& e) {}
 }
 
 int	main()
